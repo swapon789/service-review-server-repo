@@ -68,6 +68,23 @@ async function run() {
             const updateUser = await reviewsCollection.findOne(query);
             res.send(updateUser);
         });
+        app.patch('/review/:id', async (req, res) => {
+            const id = req.params.id;
+            const user = req.body;
+            console.log(user);
+            const query = { _id: ObjectId(id) }
+            const option = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    name: user.name,
+                    photoURL: user.photo,
+                    description: user.description,
+                    ratings: user.ratings,
+                }
+            }
+            const result = await reviewsCollection.updateOne(query, updateDoc, option);
+            res.send(result);
+        });
 
     }
     finally {
