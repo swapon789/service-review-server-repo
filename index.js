@@ -16,7 +16,7 @@ async function run() {
     try {
         const serviceCollection = client.db('dentrexaUser').collection('services');
         const reviewsCollection = client.db('dentrexaUser').collection('reviews');
-      
+
         app.get('/services', async (req, res) => {
             const query = {}
             const cursor = serviceCollection.find(query);
@@ -45,7 +45,30 @@ async function run() {
             const result = await reviewsCollection.insertOne(review);
             res.send(result);
         });
-        
+        app.get('/review', verifyJWT, async (req, res) => {
+            const decoded = req.decoded;
+
+            if (decoded.email !== req.query.email) {
+                return res.status(403).send({ message: 'unauthorized access' })
+            }
+
+            let query = {};
+            if (req.query.email) {
+                query = {
+                    email: req.query.email
+                }
+            }
+            const cursor = reviewsCollection.find(query);
+            const orders = await cursor.toArray();
+            res.send(orders);
+        });
+        app.get('/review/:id', async (req, res) => {
+            const id = req.body;
+            const query = { _id: ObjectId(id) };
+            const updateUser = await reviewsCollection.findOne(query);
+            res.send(updateUser);
+        });
+
     }
     finally {
 
