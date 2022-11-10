@@ -15,13 +15,13 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 function verifyJWT(req, res, next) {
     const authHeader = req.headers.authorization;
-    if (!authHeader) {
-        return res.status(401).send({ message: "unauthorized access" })
+    if(!authHeader){
+        return res.status(401).send({message:"unauthorized access"})
     }
     const token = authHeader.split(' ')[1];
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
-        if (err) {
-            return res.status(401).send({ message: "unauthorized access" })
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function(err, decoded){
+        if(err){
+           return res.status(401).send({message:"unauthorized access"})
         }
         req.decoded = decoded;
         next();
@@ -70,6 +70,7 @@ async function run() {
         });
         app.get('/review', verifyJWT, async (req, res) => {
             const decoded = req.decoded;
+            console.log(decoded);
 
             if (decoded.email !== req.query.email) {
                 return res.status(403).send({ message: 'unauthorized access' })
@@ -86,12 +87,12 @@ async function run() {
             res.send(orders);
         });
         app.get('/review/:id', async (req, res) => {
-            const id = req.body;
+            const id = req.body.id;
             const query = { _id: ObjectId(id) };
             const updateUser = await reviewsCollection.findOne(query);
             res.send(updateUser);
         });
-        app.patch('/review/:id', async (req, res) => {
+        app.put('/review/:id', async (req, res) => {
             const id = req.params.id;
             const user = req.body;
             console.log(user);
