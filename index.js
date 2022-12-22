@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
-const jwt = require("jsonwebtoken");
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
 const port = process.env.PORT || 5000;
@@ -13,15 +13,18 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_USER_PASSWORD
 console.log(uri)
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
+
 function verifyJWT(req, res, next) {
     const authHeader = req.headers.authorization;
-    if(!authHeader){
-        return res.status(401).send({message:"unauthorized access"})
+    if (!authHeader) {
+        return res.status(401).send('unaurhirized access')
     }
+
     const token = authHeader.split(' ')[1];
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function(err, decoded){
-        if(err){
-           return res.status(401).send({message:"unauthorized access"})
+
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+        if (err) {
+            return res.status(403).send({ message: "forbiden access" })
         }
         req.decoded = decoded;
         next();
@@ -35,11 +38,11 @@ async function run() {
 
         app.post('/jwt', (req, res) => {
             const user = req.body;
-            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1d" })
-            res.send({ token })
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn:"60d"})
+            res.send({token})
         })
 
-
+       
         app.get('/services', async (req, res) => {
             const query = {}
             const cursor = serviceCollection.find(query);
